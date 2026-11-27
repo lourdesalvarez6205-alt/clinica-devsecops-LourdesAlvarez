@@ -1,0 +1,34 @@
+name: Pipeline DevSecOps - Seguridad Clínica
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sca-dependencias:
+    name: Análisis de Dependencias (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar dependencias y auditar vulnerabilidades
+        run: |
+          npm install --package-lock-only
+          npm audit --audit-level=high
+
+  sast-codigo:
+    name: Análisis Estático de Código (Semgrep SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+      - name: Ejecutar Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/javascript p/sql-injection
